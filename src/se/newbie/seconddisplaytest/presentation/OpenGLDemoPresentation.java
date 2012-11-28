@@ -7,6 +7,7 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import se.newbie.seconddisplaytest.presentation.PresentationState.hasPresentationState;
 import android.app.Presentation;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
@@ -14,21 +15,37 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
 import android.view.Display;
 
-public class OpenGLDemoPresentation extends Presentation {
+public class OpenGLDemoPresentation extends Presentation implements hasPresentationState {
 
-	public OpenGLDemoPresentation(Context aOuterContext, Display aDisplay) {
+	PresentationState mState;
+	OpenGLRenderer mOpenGLRenderer;
+
+	public OpenGLDemoPresentation(Context aOuterContext, Display aDisplay, PresentationState aState) {
 		super(aOuterContext, aDisplay);
-
+		mState = aState;
 		GLSurfaceView view = new GLSurfaceView(aOuterContext);
-		view.setRenderer(new OpenGLRenderer());
+		mOpenGLRenderer = new OpenGLRenderer();
+		view.setRenderer(mOpenGLRenderer);
 		setContentView(view);
+	}
 
+	@Override
+	public PresentationState getPresentationState() {
+		mState.put("cube_rotation", Float.toString(mOpenGLRenderer.mCubeRotation));
+		return mState;
 	}
 
 	class OpenGLRenderer implements Renderer {
 
 		private Cube mCube = new Cube();
 		private float mCubeRotation;
+
+		public OpenGLRenderer() {
+			String s = mState.get("cube_rotation");
+			if (s != null) {
+				mCubeRotation = Float.parseFloat(s);
+			}
+		}
 
 		@Override
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -106,5 +123,4 @@ public class OpenGLDemoPresentation extends Presentation {
 			gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		}
 	}
-
 }

@@ -83,6 +83,10 @@ public class DisplayListFragment extends Fragment {
 		mCallback.onDisplayChanged(aDisplay, aIsChecked);
 	}
 
+	public DisplayAdapter getDisplayAdapter() {
+		return mDisplayAdapter;
+	}
+
 	class DisplayAdapter extends BaseAdapter implements DisplayListener {
 
 		private Context mContext;
@@ -92,7 +96,6 @@ public class DisplayListFragment extends Fragment {
 		public DisplayAdapter(Context context, DisplayListFragment displayListFragment) {
 			mDisplayListFragment = displayListFragment;
 			mContext = context;
-			updateDisplays();
 		}
 
 		public int getCount() {
@@ -159,10 +162,9 @@ public class DisplayListFragment extends Fragment {
 		}
 
 		public void updateDisplays() {
-			this.clear();
-
 			DisplayManager displayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
 			Display[] displays = displayManager.getDisplays(); // DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
+			this.clear();
 			addAll(displays);
 
 			Log.d(TAG, "There are currently " + displays.length + " displays connected.");
@@ -179,7 +181,7 @@ public class DisplayListFragment extends Fragment {
 
 		@Override
 		public void onDisplayChanged(int index) {
-			Log.v(TAG, "Remove changed #" + index);
+			Log.v(TAG, "Display changed #" + index);
 			updateDisplays();
 		}
 
