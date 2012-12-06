@@ -28,11 +28,14 @@ import android.widget.TextView;
 public class DisplayListFragment extends Fragment {
 	private final static String TAG = DisplayListFragment.class.getCanonicalName();
 
+	private static final String SAVED_LIST_KEY = "selected_displays";
+
 	private View mView;
 	private ListView mListView;
 	private OnDisplayChangedListener mCallback;
 	private DisplayManager mDisplayManager;
 	private DisplayAdapter mDisplayAdapter;
+	private ArrayList<Integer> mSelectedDisplays;
 
 	public interface OnDisplayChangedListener {
 		public void onDisplayChanged(Display aDisplay, boolean aIsChecked);
@@ -47,6 +50,12 @@ public class DisplayListFragment extends Fragment {
 
 		mView = inflater.inflate(R.layout.display_list, container, false);
 		mListView = (ListView) mView.findViewById(R.id.display_list);
+
+		if (savedInstanceState != null) {
+			mSelectedDisplays = savedInstanceState.getIntegerArrayList(SAVED_LIST_KEY);
+		} else {
+			mSelectedDisplays = new ArrayList<Integer>();
+		}
 
 		mDisplayAdapter = new DisplayAdapter(context, this);
 		mListView.setAdapter(mDisplayAdapter);
@@ -70,6 +79,13 @@ public class DisplayListFragment extends Fragment {
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle aOutState) {
+		super.onSaveInstanceState(aOutState);
+
+		aOutState.putIntegerArrayList(SAVED_LIST_KEY, mSelectedDisplays);
+	}
+
+	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		try {
@@ -85,6 +101,10 @@ public class DisplayListFragment extends Fragment {
 
 	public DisplayAdapter getDisplayAdapter() {
 		return mDisplayAdapter;
+	}
+
+	protected List<Integer> getSelectedDisplays() {
+		return mSelectedDisplays;
 	}
 
 	class DisplayAdapter extends BaseAdapter implements DisplayListener {
@@ -131,6 +151,10 @@ public class DisplayListFragment extends Fragment {
 
 			final CheckBox checkBox = (CheckBox) view.findViewById(R.id.display_list_item_checkbox);
 
+			if (mDisplayListFragment.getSelectedDisplays().contains(display.getDisplayId())) {
+				checkBox.setChecked(true);
+			}
+
 			nameTextView.setText(display.getName());
 
 			String description = "";
@@ -154,6 +178,12 @@ public class DisplayListFragment extends Fragment {
 			checkBox.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View aV) {
+					if (checkBox.isChecked()) {
+						if (!mDisplayListFragment.getSelectedDisplays().contains(display.getDisplayId()))
+							mDisplayListFragment.getSelectedDisplays().add(display.getDisplayId());
+					} else {
+						mDisplayListFragment.getSelectedDisplays().remove(display.getDisplayId());
+					}
 					mDisplayListFragment.onChange(display, checkBox.isChecked());
 				}
 			});
