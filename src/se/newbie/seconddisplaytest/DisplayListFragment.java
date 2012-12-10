@@ -81,7 +81,7 @@ public class DisplayListFragment extends Fragment {
 	@Override
 	public void onSaveInstanceState(Bundle aOutState) {
 		super.onSaveInstanceState(aOutState);
-
+		Log.v(TAG, "Saving selected displays");
 		aOutState.putIntegerArrayList(SAVED_LIST_KEY, mSelectedDisplays);
 	}
 
